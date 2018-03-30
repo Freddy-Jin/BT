@@ -9,7 +9,7 @@ BLUFI 基于 GATT，定义了 ESP32 作为 GATT Server 接收 GATT Client （手
 
 你可以自定义 BLUFI 配网过程中使用的对称加密、非对称加密以及校验算法。 BLUFI 提供的示例程序默认将使用 DH 算法进行密钥协商，使用 128-AES 算法进行数据加密，使用 CRC16 进行进行数据校验。
 
-流程
+流程:
 ----
 BLUFI 配网功能包含配置 SoftAP 和 Station 两部分。
 
@@ -47,10 +47,13 @@ BLUFI 配网的配置 Station 包含广播、连接、服务发现、协商共�
 
 配网流程图请参考下图：
 
+.. figure:: https://github.com/Freddy-Jin/ESP32_BLUFI_-Design_Guidelines/blob/master/Docs/Figure1.png
+    :figclass: align-center
 
 
 BLUFI 传输格式
-=============
+*************
+
 手机 APP 与 ESP32 之间的 BLUFI 通信格式定义如下：
 
 无分段模式：
