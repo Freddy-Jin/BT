@@ -86,9 +86,9 @@ BLUFI 传输格式
 
 1. Type
 
-   类型域，占 1 Byte。分为 Type 和 Subtype（子类型域）两部分, Type 占低 2 bit，Subtype 占高 6 bit。
-   * 控制域，暂不进行加密，可校验；
-   * 数据域，可加密，可校验。
+   类型域，占 1 Byte。分为 Type 和 Subtype（子类型域）两部分, Type 占低 2 bit，Subtype 占高 6 bit。
+   * 控制帧，暂不进行加密，可校验；
+   * 数据帧，可加密，可校验。
 
 2. Frame Control
 
