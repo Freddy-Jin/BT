@@ -226,7 +226,7 @@ GATT相关说明
 ***********
 
 UUID 相关：
---------
+---------
 
 	BLUFI Service UUID： 0xFFFF	16bit
 	BLUFI（手机-> ESP32）特性：0xFF01	主要权限：可写
