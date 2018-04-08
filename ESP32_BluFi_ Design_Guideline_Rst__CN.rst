@@ -209,16 +209,21 @@ ESP32端的安全实现
 a. typedef void (*esp_blufi_negotiate_data_handler_t)(uint8_t *data, int len, uint8_t **output_data, int *output_len, bool *need_free);
 
    该函数用来接收协商期间的正常数据 (normal data)，处理完成后，需要将待发送的数据使用 output_data 和 output_len 传出。
+   
    BLUFI 会在调用完 negotiate_data_handler 后，发送 negotiate_data_handler 传出的 output_data。
+   
    这里的两个『*』，因为需要发出去的数据长度未知，所以需要函数自行分配 (malloc) 或者指向全局变量，通过 need_free 通知是否需要释放内存。
 
 b. typedef int (* esp_blufi_encrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int cyprt_len);	
+
    加密和解密的数据长度必须一致。其中 iv8 为帧的 8 Bit 序列 (sequence)，可作为 iv 的某 8 Bit 来使用。
 
 c. typedef int (* esp_blufi_decrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int crypt_len);
+
    加密和解密的数据长度必须一致。其中 iv8 为帧的 8 Bit 序列 (sequence)，可作为 iv 的某 8 Bit 来使用。
 
 d. typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
+
    该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
 
 GATT相关说明
