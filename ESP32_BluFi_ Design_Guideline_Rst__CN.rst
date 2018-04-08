@@ -231,18 +231,18 @@ ESP32端的安全实现
    #. typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
 
    该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
-
-GATT相关说明
-************
-
-UUID 相关：
-----------
-
+   
 BLUFI Service UUID： 0xFFFF	16bit
 
 BLUFI（手机-> ESP32）特性：0xFF01	主要权限：可写
 
 BLUFI（ESP32 ->手机）特性：0xFF02	主要权限：可读可通知
+
+GATT 相关说明
+*************
+
+UUID 相关：
+==========
 
 .. note::
 
