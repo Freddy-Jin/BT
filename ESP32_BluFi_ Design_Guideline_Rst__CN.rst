@@ -35,9 +35,9 @@ BLUFI 配网的配置 Station 包含广播、连接、服务发现、协商共�
 
 8. 手机向 ESP32 发送『BLUFI 传输格式』定义的 SSID、PASSWORD 等用于 Wi-Fi 连接的必要信息。
 
-9. 手机向 ESP32 发送『Wi-Fi 连接请求』控制包，ESP32 收到之后，识别为手机已将必要的信息传输完毕，准备连接 Wi-Fi。
+9. 手机向 ESP32 发送『Wi-Fi 连接请求』控制帧，ESP32 收到之后，识别为手机已将必要的信息传输完毕，准备连接 Wi-Fi。
 
-10. ESP32 连接到 Wi-Fi 后，发送『Wi-Fi 连接状态报告』控制包到手机，以报告连接状态。至此配网结束。
+10. ESP32 连接到 Wi-Fi 后，发送『Wi-Fi 连接状态报告』控制帧到手机，以报告连接状态。至此配网结束。
 
 .. note::
 
@@ -220,7 +220,6 @@ ESP32端的安全实现
 
    typedef void (*esp_blufi_negotiate_data_handler_t)(uint8_t *data, int len, uint8_t **output_data, int *output_len, bool *need_free);
 
-
    该函数用来接收协商期间的正常数据 (normal data)，处理完成后，需要将待发送的数据使用 output_data 和 output_len 传出。
    
    BLUFI 会在调用完 negotiate_data_handler 后，发送 negotiate_data_handler 传出的 output_data。
@@ -231,21 +230,18 @@ ESP32端的安全实现
 
    typedef int (* esp_blufi_encrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int cyprt_len);	
    
-   
    加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
 
 .. highlight::
    
    typedef int (* esp_blufi_decrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int crypt_len);
 
-
    加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
 
 .. highlight::
    
    typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
-   
-   
+    
    该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
    
 GATT 相关说明
