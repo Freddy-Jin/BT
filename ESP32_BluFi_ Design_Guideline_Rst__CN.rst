@@ -19,19 +19,19 @@ BLUFI 配网的配置 Station 包含广播、连接、服务发现、协商共�
 完整的配网过程如下：
 ----------------
 
-1. ESP32 开启 GATT Server 功能，发送带有特定 ***adv data*** 的广播。你可以自定义该广播，该广播不属于 BLUFI Profile。
+1. ESP32 开启 GATT Server 功能，发送带有特定 *adv data* 的广播。你可以自定义该广播，该广播不属于 BLUFI Profile。
 
 2. 使用手机 APP 搜索到该特定广播，手机作为 GATT Client 连接 ESP32。你可以决定使用哪款手机 APP。
 
-3. GATT 连接建立成功后，手机向 ESP32 发送『协商过程』的数据包（见 BLUFI 传输格式）。
+3. GATT 连接建立成功后，手机向 ESP32 发送『协商过程』的数据帧（详情见 BLUFI 传输格式）。
 
-4. ESP32 收到『协商过程』的数据包后，会解析按照使用者自定义的协商过程来解析。
+4. ESP32 收到『协商过程』的数据帧后，会解析按照使用者自定义的协商过程来解析。
 
 5. 手机与 ESP32 进行密钥协商。协商过程可使用 DH/RSA/ECC 等加密算法进行。
 
-6. 协商结束后，手机端向 ESP32 发送『设置安全模式』控制包。
+6. 协商结束后，手机端向 ESP32 发送『设置安全模式』控制帧。
 
-7. ESP32 收到『设置安全模式』控制包后，将使用经过协商的共享密钥以及配置的安全策略对通信数据进行加密和解密。
+7. ESP32 收到『设置安全模式』控制帧后，将使用经过协商的共享密钥以及配置的安全策略对通信数据进行加密和解密。
 
 8. 手机向 ESP32 发送『BLUFI 传输格式』定义的 SSID、PASSWORD 等用于 Wi-Fi 连接的必要信息。
 
@@ -56,7 +56,7 @@ BLUFI 传输格式
 
 手机 APP 与 ESP32 之间的 BLUFI 通信格式定义如下：
 
-帧不分段情况下的标准格式（8 位字节）：
+帧不分片情况下的标准格式 (8 bit)：
 
 +------------+---------------+-----------------+-------------+----------------+----------------+
 | Type (LSB) | Frame Control | Sequence Number | Data Length |      Data      | CheckSum (MSB) |
@@ -64,7 +64,9 @@ BLUFI 传输格式
 |      1     |       1       |        1        |      1      | ${Data Length} |        2       |
 +------------+---------------+-----------------+-------------+----------------+----------------+
 
-如果 **Frame Control** 帧中的 **More Frag** 位值为 1，则**Total Content Length** 为数据帧中剩余部分的总长度，用于告知终端需要分配多少内存。帧分段格式（8 位字节）：
+如果 **Frame Control** 帧中的 **More Frag** 位值为 1，则**Total Content Length** 为数据帧中剩余部分的总长度，用于报告终端需要分配多少内存。
+
+帧分片格式（8 bit）：
 
 +------------+---------------+-----------------+-------------+-------------------------------------------+----------------+
 | Type (LSB) | Frame Control | Sequence Number | Data Length |                    Data                   | CheckSum (MSB) |
@@ -74,7 +76,9 @@ BLUFI 传输格式
 |            |               |                 |             |           2          | ${Data Length} - 2 |                |
 +------------+---------------+-----------------+-------------+----------------------+--------------------+----------------+
 
-通常情况下，控制帧不包含数据位，Ack 帧类型除外。Ack 帧格式（8 位字节）：
+通常情况下，控制帧不包含数据位，Ack 帧类型除外。
+
+Ack 帧格式（8 bit）：
 
 +------------+---------------+-----------------+-------------+-----------------------+----------------+
 | Type (LSB) | Frame Control | Sequence Number | Data Length |          Data         | CheckSum (MSB) |
@@ -208,14 +212,13 @@ ESP32端的安全实现
 
 4. 防止重放攻击 (Replay Attack)
 
-   加入发包序列（Sequence），并且序列参与数据校验。
+   加入帧发送序列（Sequence），并且序列参与数据校验。
 
    在 ESP32 端的代码中，你可以决定和开发密钥协商等安全处理的流程参考上述流程图）。手机应用向 ESP32 发送协商数据，将传送给应用层处理。如果应用层不处理，可使用 BLUFI 提供的 DH 加密算法来磋商密钥。应用层需向 BLUFI 注册以下几个与安全相关的函数：
 
 .. highlight::
 
    typedef void (*esp_blufi_negotiate_data_handler_t)(uint8_t *data, int len, uint8_t **output_data, int *output_len, bool *need_free);
-   
 
    该函数用来接收协商期间的正常数据 (normal data)，处理完成后，需要将待发送的数据使用 output_data 和 output_len 传出。
    
@@ -223,40 +226,39 @@ ESP32端的安全实现
    
    这里的两个『*』，因为需要发出去的数据长度未知，所以需要函数自行分配 (malloc) 或者指向全局变量，通过 need_free 通知是否需要释放内存。
    
+   
 .. highlight::
 
    typedef int (* esp_blufi_encrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int cyprt_len);	
-
-   
    
-   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 Bit 序列 (sequence)，可作为 iv 的某 8 Bit 来使用。
+   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+
 
 .. highlight::
    
    typedef int (* esp_blufi_decrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int crypt_len);
 
-   
-   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 Bit 序列 (sequence)，可作为 iv 的某 8 Bit 来使用。
+   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+
 
 .. highlight::
    
    typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
-
    
    该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
    
-   
-BLUFI Service UUID： 0xFFFF	16bit
-
-BLUFI（手机-> ESP32）特性：0xFF01	主要权限：可写
-
-BLUFI（ESP32 ->手机）特性：0xFF02	主要权限：可读可通知
 
 GATT 相关说明
 *************
 
 UUID 相关：
 ==========
+
+BLUFI Service UUID： 0xFFFF，16 bit
+
+BLUFI（手机-> ESP32）特性：0xFF01，主要权限：可写
+
+BLUFI（ESP32 ->手机）特性：0xFF02，主要权限：可读可通知
 
 .. note::
 
