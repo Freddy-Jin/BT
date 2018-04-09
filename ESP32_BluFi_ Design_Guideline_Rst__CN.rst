@@ -216,7 +216,9 @@ ESP32端的安全实现
 
    在 ESP32 端的代码中，你可以决定和开发密钥协商等安全处理的流程参考上述流程图）。手机应用向 ESP32 发送协商数据，将传送给应用层处理。如果应用层不处理，可使用 BLUFI 提供的 DH 加密算法来磋商密钥。应用层需向 BLUFI 注册以下几个与安全相关的函数：
 
-.. highlight::
+.. highlight:: none
+
+::
 
    typedef void (*esp_blufi_negotiate_data_handler_t)(uint8_t *data, int len, uint8_t **output_data, int *output_len, bool *need_free);
 
@@ -225,25 +227,31 @@ ESP32端的安全实现
    BLUFI 会在调用完 negotiate_data_handler 后，发送 negotiate_data_handler 传出的 output_data。
    
    这里的两个『*』，因为需要发出去的数据长度未知，所以需要函数自行分配 (malloc) 或者指向全局变量，通过 need_free 通知是否需要释放内存。
-   
-.. highlight::
+ 
+.. highlight:: none
+
+::
 
    typedef int (* esp_blufi_encrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int cyprt_len);	
-   
-   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+    
+   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+  
+.. highlight:: none
 
-.. highlight::
+::
    
    typedef int (* esp_blufi_decrypt_func_t)(uint8_t iv8, uint8_t *crypt_data, int crypt_len);
 
-   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+   加密和解密的数据长度必须一致。其中 iv8 为帧的 8 bit 序列 (sequence)，可作为 iv 的某 8 bit 来使用。
+   
+.. highlight:: none
 
-.. highlight::
+::
    
    typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
-    
-   该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
    
+   该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
+      
 GATT 相关说明
 *************
 
