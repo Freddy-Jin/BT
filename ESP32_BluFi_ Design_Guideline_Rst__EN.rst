@@ -93,7 +93,7 @@ The format of Ack Frame（8 bit）：
 
 1. Type
 
-   类型域，占 1 Byte。分为 Type 和 Subtype（子类型域）两部分, Type 占低 2 bit，Subtype 占高 6 bit。Type field, taking 1 Byte, is divided into Type and Subtype that Type uses the lower 2 bit and Subtype uses the upper 6 bit.
+   Type field, taking 1 Byte, is divided into Type and Subtype that Type uses the lower 2 bit and Subtype uses the upper 6 bit.
 
    * The control frame is not encrypted for the time being and supports to be verified;
 
