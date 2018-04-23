@@ -1,62 +1,64 @@
 BLUFI
 *****
 
-概览
-====
-ESP32 的蓝牙配网功能称为 BLUFI。
+BLUFI
+*****
 
-BLUFI 基于 GATT，定义了 ESP32 作为 GATT Server 接收 GATT Client （手机等设备）的 Wi-Fi 连接信息，实现 ESP32 通过 Wi-Fi 连接 AP 或配置使用 SoftAP Profile 的过程。必要功能包含 BLUFI 层上的分片、数据加密、校验和确认等。
+Overview
+========
+BluFi for ESP32 is a network-configuration funcion via Bluetooth channel.
 
-你可以自定义 BLUFI 配网过程中使用的对称加密、非对称加密以及校验算法。 BLUFI 提供的示例程序默认将使用 DH 算法进行密钥协商，使用 128-AES 算法进行数据加密，使用 CRC16 进行进行数据校验。
+It is built on the GATT protocol, which defines the procedure of ESP32 working as the GATT Server to connect the GATT Client (e.g. an SoftAP created by a mobile phone) through Wi-Fi or configuring for the SoftAP Profile. Sharding, data encryption, checksum verification in the BluFi layer are the key parts that need your attention.
 
-流程:
-----
-BLUFI 配网功能包含配置 SoftAP 和 Station 两部分。
+The algorithms of symmetric encryption, asymmetric encryption and checksum support custmization on your demand in practical use. Here we use the DH algorithm for key negotiation, 128-AES algorithm for data encryption, and CRC16 algorithm for checksum verification.
 
-下面以配置 Station 为例说明配置步骤。
-BLUFI 配网的配置 Station 包含广播、连接、服务发现、协商共享密钥、传输数据、回传连接状态等步骤。
+The BluFi Flow:
+---------------
+The BluFi networking flow includes the configuration of the SoftAP and Station.
 
-完整的配网过程如下：
-----------------
+Take the configuration of the Station as an example to illustrate the core parts of the procedure, including broadcast, connection, service discovery, negotiation of the shared key, data transmission, connection status backhaul.
 
-1. ESP32 开启 GATT Server 功能，发送带有特定 *adv data* 的广播。你可以自定义该广播，该广播不属于 BLUFI Profile。
+The procedure is as follows:
+------------------------------
 
-2. 使用手机 APP 搜索到该特定广播，手机作为 GATT Client 连接 ESP32。你可以决定使用哪款手机 APP。
+1. Set the ESP32 into GATT Server mode and then it will send broadcasts with specific *adv data*. You can customize this broadcast as needed, which is not a part of the BluFi Profile.
 
-3. GATT 连接建立成功后，手机向 ESP32 发送『协商过程』的数据帧（详情见 BLUFI 传输格式）。
+2. Use the APP installed on the mobile phone to search for this particular broadcast. The mobile phone will connect to ESP32 as the GATT Client once the broadcast is confirmed. The APP used during this part is up to you.
 
-4. ESP32 收到『协商过程』的数据帧后，会解析按照使用者自定义的协商过程来解析。
+3. After the GATT connection is successfully established, the mobile phone will send a data frame for key negotiation to ESP32 (see the section of "The Formats of Data Frames" for details).
 
-5. 手机与 ESP32 进行密钥协商。协商过程可使用 DH/RSA/ECC 等加密算法进行。
+4. After ESP32 receives the data frame of key negotiation, it will parse the content according to the user-defined negotiation method.
 
-6. 协商结束后，手机端向 ESP32 发送『设置安全模式』控制帧。
+5. The mobile phone works with ESP32 for key negotiation using the encryption algorithms such as DH, RSA or ECC
 
-7. ESP32 收到『设置安全模式』控制帧后，将使用经过协商的共享密钥以及配置的安全策略对通信数据进行加密和解密。
+6. After the negotiation process is completed, the mobile phone will send a control frame for security-mode setup to ESP32.
 
-8. 手机向 ESP32 发送『BLUFI 传输格式』定义的 SSID、PASSWORD 等用于 Wi-Fi 连接的必要信息。
+7. When receiving this control frame, ESP32 will be able to encrypt and decrypt the communication data using the shared key and the security configuration.
 
-9. 手机向 ESP32 发送『Wi-Fi 连接请求』控制帧，ESP32 收到之后，识别为手机已将必要的信息传输完毕，准备连接 Wi-Fi。
+8. The mobile phone sends the data frame defined in the section of "The Formats of Data Frames"，with the Wi-Fi configuration information to ESP32, including SSID, password, etc.
 
-10. ESP32 连接到 Wi-Fi 后，发送『Wi-Fi 连接状态报告』控制帧到手机，以报告连接状态。至此配网结束。
+9. The mobile phone sends a control frame of Wi-Fi connection request to ESP32. When receiving this control frame, ESP32 will regard the communication of essential information as done and get ready to connect to the Wi-Fi.
+
+10. After connecting to the Wi-Fi, ESP32 will send a control frame of Wi-Fi connection status report to the mobile phone，to report the connection status. At this point the networking procedure is completed.
 
 .. note::
 
-    1. 安全模式设置可在任何时候进行，ESP32 收到安全模式的配置后，会根据安全模式指定的模式进行安全相关的操作。
+    1. After ESP32 receives the control frame of security-mode configuration, it will execute the operations in accordance with the defined security mode.
 
-    2. 进行对称加密和解密时，加密和解密前后的数据长度必须一致，支持原地加密和解密。
+    2. The data lengths before and after symmetric encryption/decryption must stay the same. It also supports in-place encryption and decryption.
 
-配网流程图请参考下图：
+The Flow Chat of BluFi:
 
 .. figure:: https://github.com/Freddy-Jin/ESP32_BLUFI_-Design_Guidelines/blob/master/Docs/Figure1.png
     :align: center
     :figclass: align-center
 
-BLUFI 传输格式
-*************
+The Frame Formats Defined in BluFi
+***************************************
 
-手机 APP 与 ESP32 之间的 BLUFI 通信格式定义如下：
+The frame formats for the communication between the mobile phone APP and ESP32 is defined as follows:
 
-帧不分片情况下的标准格式 (8 bit)：
+The frame format with no fragment (8 bit)：
 
 +------------+---------------+-----------------+-------------+----------------+----------------+
 | Type       | Frame Control | Sequence Number | Data Length |      Data      | CheckSum       |
@@ -64,9 +66,10 @@ BLUFI 传输格式
 |      1     |       1       |        1        |      1      | ${Data Length} |        2       |
 +------------+---------------+-----------------+-------------+----------------+----------------+
 
-如果 **Frame Control** 帧中的 **More Frag** 位值为 1，则 **Total Content Length** 为数据帧中剩余部分的总长度，用于报告终端需要分配多少内存。
+If the **Frame Ctrl** bit is enabled, the **Total length** bit indicates the length of data frame's rest part. It can tell the remote how much memory needs to be alloced.
 
-帧分片格式（8 bit）：
+
+The frame format with fragments（8 bit）：
 
 +------------+---------------+-----------------+-------------+-------------------------------------------+----------------+
 | Type       | Frame Control | Sequence Number | Data Length |                    Data                   | CheckSum       |
@@ -76,9 +79,9 @@ BLUFI 传输格式
 |            |               |                 |             |           2          | ${Data Length} - 2 |                |
 +------------+---------------+-----------------+-------------+----------------------+--------------------+----------------+
 
-通常情况下，控制帧不包含数据位，Ack 帧类型除外。
+Normally, the control frame does not contain data bits, except for Ack frame.
 
-Ack 帧格式（8 bit）：
+The format of Ack Frame（8 bit）：
 
 +------------+---------------+-----------------+-------------+-----------------------+----------------+
 | Type       | Frame Control | Sequence Number | Data Length |          Data         | CheckSum       |
@@ -90,11 +93,11 @@ Ack 帧格式（8 bit）：
 
 1. Type
 
-   类型域，占 1 Byte。分为 Type 和 Subtype（子类型域）两部分, Type 占低 2 bit，Subtype 占高 6 bit。
-   
-   * 控制帧，暂不进行加密，可校验；
-   
-   * 数据帧，可加密，可校验。
+   类型域，占 1 Byte。分为 Type 和 Subtype（子类型域）两部分, Type 占低 2 bit，Subtype 占高 6 bit。Type field, taking 1 Byte, is divided into Type and Subtype that Type uses the lower 2 bit and Subtype uses the upper 6 bit.
+
+   * The control frame is not encrypted for the time being and supports to be verified;
+
+   * The data frame supports to be encrypted and verified.
 +---------+--------+--------------+--------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Type    | 含义   | Subtype      | 含义                                                   | 解释                                                                                                                                                                                      | 备注                                                                                                                                                                                                                                                                  |
 +---------+--------+--------------+--------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
