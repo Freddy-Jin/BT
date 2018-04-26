@@ -192,7 +192,7 @@ The Security Implementation of ESP32
 
 3. Identity security (signature)
 
-  Algorithm like RSA can used to secure identity. But for DH, it needs other algorithms as an companion for signature.
+   Algorithm like RSA can used to secure identity. But for DH, it needs other algorithms as an companion for signature.
 
 4. To prevent replay attack
 
