@@ -165,7 +165,7 @@ The format of Ack Frame（8 bit）：
 
 3. Sequence Control
 
-   Sequence control field. When a frame is sent,the value of sequence fied is automatically added by 1 regardless of the type of frame, which prevents Replay Attack. The sequence is cleared after each reconnection.
+   Sequence control field. When a frame is sent,the value of sequence fied is automatically added by 1 regardless of the type of frame, which prevents Replay Attack. The sequence is cleared after each reconnection.
 
 4. Length
 
