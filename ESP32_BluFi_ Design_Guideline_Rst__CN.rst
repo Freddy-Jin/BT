@@ -246,7 +246,7 @@ ESP32端的安全实现
 
    加入帧发送序列（Sequence），并且序列参与数据校验。
 
-   在 ESP32 端的代码中，你可以决定和开发密钥协商等安全处理的流程参考上述流程图）。手机应用向 ESP32 发送协商数据，将传送给应用层处理。如果应用层不处理，可使用 BLUFI 提供的 DH 加密算法来磋商密钥。应用层需向 BLUFI 注册以下几个与安全相关的函数：
+   在 ESP32 端的代码中，你可以决定和开发密钥协商等安全处理的流程参考上述流程图）。手机应用向 ESP32 发送协商数据，将传送给应用层处理。如果应用层不处理，可使用 BluFi 提供的 DH 加密算法来磋商密钥。应用层需向 BluFi 注册以下几个与安全相关的函数：
 
 .. highlight:: none
 
@@ -256,7 +256,7 @@ ESP32端的安全实现
 
    该函数用来接收协商期间的正常数据 (normal data)，处理完成后，需要将待发送的数据使用 output_data 和 output_len 传出。
    
-   BLUFI 会在调用完 negotiate_data_handler 后，发送 negotiate_data_handler 传出的 output_data。
+   BluFi 会在调用完 negotiate_data_handler 后，发送 negotiate_data_handler 传出的 output_data。
    
    这里的两个『*』，因为需要发出去的数据长度未知，所以需要函数自行分配 (malloc) 或者指向全局变量，通过 need_free 通知是否需要释放内存。
  
@@ -282,7 +282,7 @@ ESP32端的安全实现
    
    typedef uint16_t (*esp_blufi_checksum_func_t)(uint8_t iv8, uint8_t *data, int len);
    
-   该函数用来计算 CheckSum，返回值为 CheckSum 的值。BLUFI 会使用该函数返回值与包末尾的 CheckSum 做比较。
+   该函数用来计算 CheckSum，返回值为 CheckSum 的值。BluFi 会使用该函数返回值与包末尾的 CheckSum 做比较。
       
 GATT 相关说明
 *************
@@ -290,14 +290,14 @@ GATT 相关说明
 UUID 相关：
 ==========
 
-BLUFI Service UUID： 0xFFFF，16 bit
+BluFi Service UUID： 0xFFFF，16 bit
 
-BLUFI（手机-> ESP32）特性：0xFF01，主要权限：可写
+BluFi（手机 -> ESP32）特性：0xFF01，主要权限：可写
 
-BLUFI（ESP32 ->手机）特性：0xFF02，主要权限：可读可通知
+BluFi（ESP32 -> 手机）特性：0xFF02，主要权限：可读可通知
 
 .. note::
 
-	1. 目前 ACK 机制已经在该 Profile 协议中定义，但是还没有代码实现。
+	1. 目前 Ack 机制已经在该 Profile 协议中定义，但是还没有代码实现。
 	
 	2. 其他部分均已实现。
