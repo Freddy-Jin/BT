@@ -251,6 +251,6 @@ Blufi（ESP32 -> the mobile phone）: 0xFF02, readable and callable
 
 .. note::
 
-	1. The Ack mechanism is already defined in the profile, but there is no code implementation.
+	1. The Ack mechanism is already defined in the profile, but there is no implementation based on the code for the time being.
 
 	2. Other parts have been implemented.
