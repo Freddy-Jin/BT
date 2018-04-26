@@ -1,4 +1,4 @@
-BLUFI
+BluFi
 *****
 
 Overview
